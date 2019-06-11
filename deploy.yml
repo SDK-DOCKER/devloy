@@ -40,7 +40,7 @@ items:
           - name: DB_USER
             value: saga
           - name: DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: QUEUE_URI
             value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
               "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
@@ -142,7 +142,7 @@ items:
           - name: APPLICATION_DB_USER
             value: saga
           - name: APPLICATION_DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: APPLICATION_DB_HOST
             value: 172.16.84.2
           - name: APPLICATION_DB_PORT
@@ -244,7 +244,7 @@ items:
           - name: APPLICATION_DB_USER
             value: saga
           - name: APPLICATION_DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: APPLICATION_DB_MAX_CONN
             value: "10"
           - name: APPLICATION_DB_MIN_CONN
@@ -460,7 +460,7 @@ items:
           - name: APPLICATION_DB_USER
             value: saga
           - name: APPLICATION_DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: APPLICATION_DB_PORT
             value: "27017"
           - name: APPLICATION_DB_MAX_CONN
@@ -535,7 +535,7 @@ items:
           - name: REDIS_PORT
             value: "6379"
           - name: REDIS_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: ACCESS_TOKEN_LIFETIME
             value: "3600"
           - name: REFRESH_TOKEN_LIFETIME
@@ -938,7 +938,7 @@ items:
           - name: APPLICATION_DB_USER
             value: saga
           - name: APPLICATION_DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: APPLICATION_DB_MAX_CONN
             value: "10"
           - name: APPLICATION_DB_MIN_CONN
@@ -952,7 +952,7 @@ items:
           - name: REDIS_PORT
             value: "6379"
           - name: REDIS_PASSWORD
-            value: 'saga_123'
+            value: 'sZy4pTeJ1M'
           - name: TOKEN_URL
             value: http://172.16.84.7/oauth/check_token
           - name: ACCESS_CONTROL_URL
@@ -1098,7 +1098,7 @@ items:
           - name: REDIS_PORT
             value: "6379"
           - name: REDIS_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: SOCKET_REQUEST_TIMEDOUT
             value: "5000"
           - name: SOCKET_PING_INTERVAL
@@ -1140,7 +1140,7 @@ items:
           - name: APPLICATION_DB_USER
             value: saga
           - name: APPLICATION_DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: APPLICATION_DB_HOST
             value: 172.16.84.2
           - name: APPLICATION_DB_PORT
@@ -1288,7 +1288,7 @@ items:
           - name: APPLICATION_DB_USER
             value: saga
           - name: APPLICATION_DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: APPLICATION_DB_MAX_CONN
             value: "10"
           - name: APPLICATION_DB_MIN_CONN
@@ -1475,7 +1475,7 @@ items:
           - name: DB_USER
             value: saga
           - name: DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: QUEUE_NAME_PERSIST_DATA
             value: x.service.persist_batch
           - name: QUEUE_NAME_FINALIZE_DATA
@@ -1548,7 +1548,7 @@ items:
           - name: DB_USER
             value: saga
           - name: DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: QUEUE_NAME_PERSIST_DATA
             value: x.service.persist_batch
           - name: QUEUE_NAME_FINALIZE_DATA
@@ -1621,7 +1621,7 @@ items:
           - name: DB_USER
             value: saga
           - name: DB_PASSWORD
-            value: saga_123
+            value: sZy4pTeJ1M
           - name: QUEUE_NAME_EXPORT
             value: x.service.export
           - name: CONNECT_OPTIONS
