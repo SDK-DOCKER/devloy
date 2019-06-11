@@ -1,0 +1,1647 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: acq-collector
+    name: acq-collector
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: acq-collector
+    template:
+      metadata:
+        labels:
+          app: acq-collector
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            value: apollo_workflow
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_MAX_CONNECTIONS
+            value: "10"
+          - name: DB_MIN_CONNECTIONS
+            value: "2"
+          - name: DB_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "10"
+          - name: RECONNECT_INTERVAL
+            value: "500"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: DB_USER
+            value: saga
+          - name: DB_PASSWORD
+            value: saga_123
+          - name: QUEUE_URI
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: QUEUE_SELECTOR
+            value: '""'
+          - name: URL_API_RE_PUSH
+          - name: URL_API_MONITOR
+          image: 172.16.84.2/acq-collector:r1.0.37
+          imagePullPolicy: Always
+          name: acq-collector
+          ports:
+          - containerPort: 80
+            name: acq-collector
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: admin-ui
+    name: admin-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: admin-ui
+    template:
+      metadata:
+        labels:
+          app: admin-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: REGISTER_PAGE
+            value: "true"
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "15"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "20"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "5"
+          - name: ELROND_ENV
+            value: SIT
+          - name: HOTLINES
+            value: '[]'
+          image: 172.16.84.2/admin-ui:v2.0.17
+          name: admin-ui
+          ports:
+          - containerPort: 80
+            name: admin-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: api-core
+    name: api-core
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: api-core
+    template:
+      metadata:
+        labels:
+          app: api-core
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_USER
+            value: saga
+          - name: APPLICATION_DB_PASSWORD
+            value: saga_123
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "60"
+          - name: RECONNECT_INTERVAL
+            value: "1000"
+          - name: RECONNECT_INTERVAL
+            value: "-1"
+          - name: QUEUE_URI
+            value: amqp://admin:admin@172.16.84.2:5672
+          - name: TOKEN_URL
+            value: http://oauth2-server/oauth/check_token
+          - name: ACCESS_CONTROL_URL
+            value: http://uac/oauth/access-controls
+          - name: BPMN_API_URI
+            value: http://172.16.84.7/workflow-api
+          - name: SERVER_MOUNT_POINT
+            value: /mnt
+          - name: S3_HOST
+            value: http://172.16.84.8/view
+          - name: XXTEA_KEY
+            value: PLuiuEZfzcK8kpnMEOHd6Y3xv9IyoJJnoC
+          - name: FOLDER_CARD_IMG
+            value: /mnt/x-storage/
+          - name: MAIL_CREDENTIAL_HOST
+            value: mail.digi-texx.vn
+          - name: MAIL_CREDENTIAL_PORT
+            value: "25"
+          - name: MAIL_CREDENTIAL_SECURE
+            value: "false"
+          - name: MAIL_CREDENTIAL_REQUIRE_TLS
+            value: "true"
+          - name: MAIL_AUTH_USERNAME
+            value: tinhht@gmail.com
+          - name: MAIL_AUTH_PASSWORD
+            value: d!g!-INFO
+          - name: MAIL_OPTIONS_FROM
+            value: tinhht@gmail.com
+          - name: MAIL_OPTIONS_TO
+            value: hoanghp@gmail.com
+          - name: MAIL_OPTIONS_SUBJECT
+            value: Sit env
+          - name: MAIL_OPTIONS_TEXT
+          - name: SEND_MAIL_AFTER_LOST_CONNECT
+            value: "30000"
+          - name: DB_CONNECT_STATUS
+            value: '{}'
+          - name: BUFFER_STORED_MAX
+            value: "-1"
+          image: 172.16.84.2/api-core:v1.0.108
+          imagePullPolicy: Always
+          name: api-core
+          ports:
+          - containerPort: 80
+            name: api-core
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: bpmn-api
+    name: bpmn-api
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bpmn-api
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bpmn-api
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_USER
+            value: saga
+          - name: APPLICATION_DB_PASSWORD
+            value: saga_123
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: BPMN_URI
+            value: http://172.16.84.7/engine-rest/
+          - name: XML_FILE_PATH
+            value: x.queue.working_detail
+          - name: CONNECT_OPTIONS
+            value: ' {"amqp":"amqp://admin:admin@172.16.84.2:5672","stomp":[{"host":"172.16.84.2","port":61613,"connectHeaders":{"heart-beat":
+              "60000,60000","host":"/","login":"admin","passcode":"admin"}}]}'
+          - name: TOKEN_URL
+            value: http://172.16.84.7/oauth/check_token
+          - name: ACCESS_CONTROL_URL
+            value: http://172.16.84.7/oauth/access-controls
+          - name: QUEUE_NAME
+          image: 172.16.84.2/bpmn-api:t1.0.51
+          name: bpmn-api
+          ports:
+          - containerPort: 80
+            name: bpmn-api
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: bpmn-engine
+    name: bpmn-engine
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bpmn-engine
+    template:
+      metadata:
+        labels:
+          app: bpmn-engine
+      spec:
+        containers:
+        - env:
+          - name: JDBC_URL
+            value: jdbc:postgresql://172.16.84.3:5432/dgs3_181220_bpmn_apollo
+          - name: JDBC_USERNAME
+            value: ps_bpmn_apollo
+          - name: JDBC_PASSWORD
+            value: bpmn181220172530
+          - name: TOMCAT_USERNAME
+            value: admin
+          - name: TOMCAT_PASSWORD
+            value: admin
+          - name: MAX_POOL_SIZE
+            value: "100"
+          - name: HISTORY_LEVEL
+            value: none
+          - name: HISTORY_QUEUE_URI
+            value: failover:(tcp://172.16.84.2:61616)?randomize=false&amp;priorityBackup=true&amp;priorityURIs=tcp://172.16.84.2:61616
+          - name: HISTORY_QUEUE_USER
+            value: admin
+          - name: HISTORY_QUEUE_PASS
+            value: admin
+          - name: HISTORY_QUEUE_NAME
+            value: x.camunda.history
+          - name: HISTORY_MAX_CONN
+            value: "10"
+          - name: JDBC_MAX_ACTIVE
+            value: "100"
+          - name: JAVA_OPTS
+            value: -Xms128m -Xmx4098m -XX:MaxPermSize=2048m -Dfile.encoding=UTF-8
+          image: 172.16.84.2/bpmn-engine:t1.0.12
+          imagePullPolicy: Always
+          name: bpmn-engine
+          ports:
+          - containerPort: 80
+            name: bpmn-engine
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: bpmn-exe-sign
+    name: bpmn-exe-sign
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bpmn-exe-sign
+    template:
+      metadata:
+        labels:
+          app: bpmn-exe-sign
+      spec:
+        containers:
+        - env:
+          - name: QUEUE_NAME
+            value: x.service.reply
+          - name: CONNECT_OPTIONS
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: WORKFLOW_HOST
+            value: http://bpmn-engine/engine-rest
+          - name: RETRY_TIMES
+            value: "10"
+          - name: RETRY_INTERVAL
+            value: "500"
+          - name: DEBUG
+            value: "false"
+          image: 172.16.84.2/bpmn-exe-sign:t1.0.0
+          name: bpmn-exe-sign
+          ports:
+          - containerPort: 80
+            name: bpmn-exe-sign
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: design-ui
+    name: design-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: design-ui
+    template:
+      metadata:
+        labels:
+          app: design-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: REGISTER_PAGE
+            value: "true"
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "15"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "20"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "5"
+          - name: ELROND_ENV
+            value: SIT
+          - name: HOTLINES
+            value: '[]'
+          - name: BPMN_ENDPOINT
+            value: http://172.16.84.7/workflow-api
+          image: 172.16.84.2/design-ui:v0.0.38
+          imagePullPolicy: Always
+          name: design-ui
+          ports:
+          - containerPort: 80
+            name: design-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: oauth2-server
+    name: oauth2-server
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: oauth2-server
+    template:
+      metadata:
+        labels:
+          app: oauth2-server
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_USER
+            value: saga
+          - name: APPLICATION_DB_PASSWORD
+            value: saga_123
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: MAIL_CREDENTIAL_HOST
+            value: mail.digi-texx.vn
+          - name: MAIL_CREDENTIAL_PORT
+            value: "25"
+          - name: MAIL_CREDENTIAL_SECURE
+            value: "false"
+          - name: MAIL_CREDENTIAL_REQUIRE_TLS
+            value: "true"
+          - name: MAIL_AUTH_USERNAME
+            value: cloud
+          - name: MAIL_AUTH_PASSWORD
+            value: Texx#3211
+          - name: MAIL_OPTIONS_FROM
+            value: cloud@gmail.com
+          - name: MAIL_OPTIONS_TO
+            value: hoanghp@gmail.com
+          - name: MAIL_OPTIONS_SUBJECT
+            value: Saga System
+          - name: MAIL_OPTIONS_TEXT
+          - name: REGISTER_FOLDER_IMAGE_ID_CARD
+            value: /mnt/x-storage/image-id-card-number
+          - name: REGISTER_LINK_ACTIVE
+            value: http://172.16.84.7/active/<%=user_id%>
+          - name: REGISTER_REGISTER_MAIL_SUCCESS
+            value: '''<div>Dear <strong><%=data.fullname%></strong>,</div><div>Thanks
+              for registering for a Digi-Texx account on Cloud! Before we get started,
+              we just need to confirm that this is you.</div><div>Click <a href=''<%=data.link%>''>Here
+              </a>to verify your account with:<br/><br/> - Code Active: <strong><%=data.code%></strong></div>'''
+          - name: REGISTER_ACTIVE_MAIL_SUCCESS
+            value: '<div>Hello <%=data.fullname%>,<br />Congratulations! You&rsquo;ve
+              successfully created a Digi-Texx account and can kickstart your project
+              with:<br /><br />Username: <%=data.username%><br />Password: <%=data.password%><br
+              /><br />Welcome aboard</div>'
+          - name: REGISTER_COFIRM_TIMEOUT
+            value: "30"
+          - name: SERVER_MOUNT_POINT
+            value: /mnt
+          - name: S3_HOST
+            value: http://172.16.84.8/view
+          - name: XXTEA_KEY
+            value: PLuiuEZfzcK8kpnMEOHd6Y3xv9IyoJJnoC
+          - name: IS_CLOUD
+            value: "true"
+          - name: LDAP_URL
+            value: "ldap"
+          - name: LDAP_DOMAIN
+            value: "domain"
+          - name: LDAP_BASEDN
+            value: "basedn"
+          - name: LDAP_USER
+            value: "userldap"
+          - name: LDAP_PASSWORD
+            value: "123456"
+          - name: LDAP_USER_FILTER
+            value: "fillter"
+          - name: LDAP_MAX_LIMIT
+            value: "10000"
+          - name: LDAP_MAX_CONNECTION
+            value: "15"
+          - name: LDAP_CACHE_EXPIRY
+            value: "900"
+          - name: REDIS_HOST
+            value: 172.16.84.5
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_PASSWORD
+            value: saga_123
+          - name: ACCESS_TOKEN_LIFETIME
+            value: "3600"
+          - name: REFRESH_TOKEN_LIFETIME
+            value: "3600"
+          image: 172.16.84.2/oauth2-server:v1.0.19
+          name: oauth2-server
+          ports:
+          - containerPort: 80
+            name: oauth2-server
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: prd-admin-ui
+    name: prd-admin-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: prd-admin-ui
+    template:
+      metadata:
+        labels:
+          app: prd-admin-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: REPORT_ENDPOINT
+            value: http://172.16.84.7/report-api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: BPMN_ENDPOINT
+            value: http://172.16.84.7/workflow-api
+          - name: TRAINING_ENDPOINT
+            value: http://172.16.84.7/training-api
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "20"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "5"
+          - name: ELROND_ENV
+            value: SIT
+          - name: HOTLINES
+            value: '[]'
+          image: 172.16.84.2/prd-admin-ui:v0.0.102
+          imagePullPolicy: Always
+          name: prd-admin-ui
+          ports:
+          - containerPort: 80
+            name: prd-admin-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: production-ui
+    name: production-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: production-ui
+    template:
+      metadata:
+        labels:
+          app: production-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: REPORT_ENDPOINT
+            value: http://172.16.84.7/report-api
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: BPMN_ENDPOINT
+            value: http://172.16.84.7/workflow-api
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "10"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "10"
+          - name: ELROND_ENV
+            value: SAGA
+          - name: HOTLINES
+            value: '[]'
+          - name: JIVO_ID
+            value: 1Uca3pkZMm
+          image: 172.16.84.2/production-ui:v0.0.145
+          name: production-ui
+          ports:
+          - containerPort: 80
+            name: production-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: qc-admin-ui
+    name: qc-admin-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: qc-admin-ui
+    template:
+      metadata:
+        labels:
+          app: qc-admin-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: REGISTER_PAGE
+            value: "true"
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "15"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "20"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "5"
+          - name: ELROND_ENV
+            value: SAGA
+          - name: HOTLINES
+            value: '[]'
+          image: 172.16.84.2/qc-admin-ui:v0.0.21
+          imagePullPolicy: Always
+          name: qc-admin-ui
+          ports:
+          - containerPort: 80
+            name: qc-admin-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: qc-control-ui
+    name: qc-control-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: qc-control-ui
+    template:
+      metadata:
+        labels:
+          app: qc-control-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: REGISTER_PAGE
+            value: "true"
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "15"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "20"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "5"
+          - name: ELROND_ENV
+            value: "SAGA"
+          - name: HOTLINES
+            value: '[]'
+          image: 172.16.84.2/qc-control-ui:v0.0.41
+          imagePullPolicy: Always
+          name: qc-control-ui
+          ports:
+          - containerPort: 80
+            name: qc-control-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: queue-acq-down
+    name: queue-acq-down
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: queue-acq-down
+    template:
+      metadata:
+        labels:
+          app: queue-acq-down
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_NAME
+            value: apollo_workflow
+          - name: DB_USER
+            value: dgs3_apollo
+          - name: DB_PASSWORD
+            value: L2unch2p0ll0
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_MAX_CONNECTIONS
+            value: "10"
+          - name: DB_MIN_CONNECTIONS
+            value: "2"
+          - name: DB_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "500"
+          - name: RECONNECT_INTERVAL
+            value: "60"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: QUEUE_URI
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: QUEUE_SELECTOR
+            value: '""'
+          - name: WORKFLOW_HOST
+            value: http://172.16.84.7/engine-rest/
+          - name: WORKFLOW_DEFAULT_MESSAGE_PRIORITY
+            value: "5"
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: URL_API_UPDATE_ERROR_STATUS_TO_DB
+          - name: URL_API_RE_PUSH_TO_ACQUIRING_QUEUE
+          - name: URL_API_RE_PUSH_TO_PRE_PROCESSING_QUEUE
+          - name: URL_API_RE_UPDATE_STATUS_ITEM_TO_DB
+          - name: MAIL_CREDENTIAL_HOST
+            value: mail.digi-texx.vn
+          - name: MAIL_CREDENTIAL_USERNAME
+            value: autodownload_mail
+          - name: MAIL_CREDENTIAL_PASSWORD
+            value: Texx#321
+          - name: MAIL_CREDENTIAL_PORT
+            value: "25"
+          - name: MAIL_CREDENTIAL_SECURE
+            value: "false"
+          - name: MAIL_CREDENTIAL_TLS
+            value: "true"
+          image: 172.16.84.2/queue-acq-down:r1.0.37
+          imagePullPolicy: Always
+          name: queue-acq-down
+          ports:
+          - containerPort: 80
+            name: queue-acq-down
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        dnsPolicy: ClusterFirst
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: queue-acq-sch
+    name: queue-acq-sch
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: queue-acq-sch
+    template:
+      metadata:
+        labels:
+          app: queue-acq-sch
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_NAME
+            value: apollo_workflow
+          - name: DB_USER
+            value: dgs3_apollo
+          - name: DB_PASS
+            value: L2unch2p0ll0
+          - name: QUEUE_NAME
+            value: da.acquisitor.job.dedup
+          - name: QUEUE_URL
+            value: failover:(tcp://172.16.84.2:61616)
+          - name: QUEUE_USERNAME
+            value: admin
+          - name: QUEUE_PASSWORD
+            value: admin
+          image: 172.16.84.2/queue-acq-sch:r1.0.1
+          imagePullPolicy: Always
+          name: queue-acq-sch
+          ports:
+          - containerPort: 80
+            name: queue-acq-sch
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: report-api
+    name: report-api
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: report-api
+    template:
+      metadata:
+        labels:
+          app: report-api
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_USER
+            value: saga
+          - name: APPLICATION_DB_PASSWORD
+            value: saga_123
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: BPMN_API_URI
+            value: http://172.16.84.7/workflow-api
+          - name: REDIS_HOST
+            value: 172.16.84.5
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_PASSWORD
+            value: 'saga_123'
+          - name: TOKEN_URL
+            value: http://172.16.84.7/oauth/check_token
+          - name: ACCESS_CONTROL_URL
+            value: http://172.16.84.7/oauth/access-controls
+          image: 172.16.84.2/report-api:t1.0.4
+          imagePullPolicy: Always
+          name: report-api
+          ports:
+          - containerPort: 80
+            name: report-api
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: root-ui
+    name: root-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: root-ui
+    template:
+      metadata:
+        labels:
+          app: root-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: API_ENDPOINT_PRD
+            value: http://172.16.84.7/api
+          - name: API_LOOKUP
+            value: http://172.16.84.7/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: REGISTER_PAGE
+            value: "true"
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "15"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "20"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "5"
+          - name: ELROND_ENV
+            value: "20"
+          - name: HOTLINES
+            value: '[]'
+          - name: CONFIG_LOGIN_PAGE
+            value: '{\"app_name\":\"CLOUD\",\"contents\":{\"inform\":\"THÔNG BÁO TUYỂN
+              DỤNG VỊ TRÍ\",\"inform1\":\"NHẬP DỮ LIỆU FULLTIME\",\"inform2\":\"LÀM
+              VIỆC TẠI CÔNG TY QUẬN 12 TPHCM\",\"selectType\":\"Hình thức đăng ký\",\"buttonGoogle\":\"Mẫu
+              đăng ký\",\"buttonFacebook\":\"Fan Page\",\"googleLink\":\"\",\"fackbookLink\":\"\"},\"footer\":{\"item1\":{\"item11\":{\"lengths\":[\"title\",\"mail\",\"hotlineOne\"],\"title\":\"HR
+              Support (Contract + Salary)\",\"mail\":\"hr@gmail.com\",\"hotlineOne\":\"0902518218\",\"hotlineTwo\":\"\"}},\"item2\":{\"lengths\":[\"copyRight\",\"versions\"],\"versions\":\"version:
+              \",\"copyRight\":\"Copyright: Digi-texx.vn\"}}}'
+          image: 172.16.84.2/root-ui:v0.0.56
+          imagePullPolicy: Always
+          name: root-ui
+          ports:
+          - containerPort: 80
+            name: root-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: s3
+    name: s3
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: s3
+    template:
+      metadata:
+        labels:
+          app: s3
+      spec:
+        containers:
+        - env:
+          - name: ARG_IMAGINARY
+            value: -concurrency=10 -cors=true -gzip -mount=/mnt -allowed-origins=http://172.16.84.7,http://localhost,http://172.16.84.8
+          - name: SECRECT_KEY
+            value: PLuiuEZfzcK8kpnMEOHd6Y3xv9IyoJJnoC
+          - name: S2_SERVER_NAME
+            value: s2.saga.uk
+          - name: S3_SERVER_NAME
+            value: 172.16.84.8
+          image: 172.16.84.2/s3:v3
+          imagePullPolicy: Always
+          name: s3
+          ports:
+          - containerPort: 80
+            name: s3
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        dnsPolicy: ClusterFirst
+        hostAliases:
+        - hostnames:
+          - s2.saga.uk
+          ip: 127.0.0.1
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: socket-server
+    name: socket-server
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: socket-server
+    template:
+      metadata:
+        labels:
+          app: socket-server
+      spec:
+        containers:
+        - env:
+          - name: REDIS_HOST
+            value: 172.16.84.5
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_PASSWORD
+            value: saga_123
+          - name: SOCKET_REQUEST_TIMEDOUT
+            value: "5000"
+          - name: SOCKET_PING_INTERVAL
+            value: "10000"
+          - name: SOCKET_PING_TIMEDOUT
+            value: "5000"
+          - name: SOCKET_PATH_URI
+            value: /ws
+          - name: AUTH_URL
+            value: http://172.16.84.7/oauth/check_token
+          image: 172.16.84.2/socket-server:t1.0.6
+          imagePullPolicy: Always
+          name: socket-server
+          ports:
+          - containerPort: 80
+            name: socket-server
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: training-api
+    name: training-api
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: training-api
+    template:
+      metadata:
+        labels:
+          app: training-api
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_USER
+            value: saga
+          - name: APPLICATION_DB_PASSWORD
+            value: saga_123
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: TOKEN_URL
+            value: http://172.16.84.7/oauth/check_token
+          - name: ACCESS_CONTROL_URL
+            value: http://172.16.84.7/oauth/access-controls
+          - name: MAIL_TRAINING
+            value: '{}'
+          - name: SERVER_MOUNT_POINT
+            value: /mnt
+          - name: S3_HOST
+            value: http://172.16.84.8/view
+          - name: XXTEA_KEY
+            value: PLuiuEZfzcK8kpnMEOHd6Y3xv9IyoJJnoC
+          - name: MAIL_CREDENTIAL_HOST
+            value: "mail.google.com"
+          - name: MAIL_CREDENTIAL_PORT
+            value: "25"
+          - name: MAIL_CREDENTIAL_SECURE
+            value: "false"
+          - name: MAIL_CREDENTIAL_REQUIRE_TLS
+            value: "true"
+          - name: MAIL_AUTH_USERNAME
+            value: tinhht@gmail.com
+          - name: MAIL_AUTH_PASSWORD
+            value: "password"
+          - name: MAIL_OPTIONS_FROM
+            value: tinhht@gmail.com
+          - name: MAIL_OPTIONS_TO
+            value: hoanghp@gmail.com
+          - name: MAIL_OPTIONS_SUBJECT
+            value: SAGA
+          - name: MAIL_OPTIONS_TEXT
+          - name: TRAINING_HR_EMAIL
+            value: hoanghp@gmail.com
+          - name: TRAINING_IT_SUPPORT_EMAIL
+            value: hoanghp@gmail.com
+          - name: TRAINING_CONTENT_MAIL_USER
+            value: hoanghp@gmail.com
+          - name: TRAINING_CONTENT_MAIL_HR
+            value: hoanghp@gmail.com
+          - name: TRAINING_PHONE1_HR
+            value: "0123456"
+          - name: TRAINING_PHONE2_HR
+            value: "01234567"
+          - name: REGISTER_COFIRM_TIMEOUT
+            value: "30"
+          image: 172.16.84.2/training-api:r0.0.25
+          name: training-api
+          ports:
+          - containerPort: 80
+            name: training-api
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: training-ui
+    name: training-ui
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: training-ui
+    template:
+      metadata:
+        labels:
+          app: training-ui
+      spec:
+        containers:
+        - env:
+          - name: API_ENDPOINT
+            value: http://172.16.84.7/api
+          - name: TRAINING_ENDPOINT
+            value: http://172.16.84.7/training-api
+          - name: UAC_ENDPOINT
+            value: http://172.16.84.7/oauth/access-controls
+          - name: REPORT_ENDPOINT
+            value: http://172.16.84.7/report-api
+          - name: OAUTH_ENDPOINT
+            value: http://172.16.84.7/oauth
+          - name: API_LOOKUP
+            value: https://lookups.digi-texx.vn/lookups
+          - name: API_OMR
+            value: http://sit.omr.x.digi-texx.vn
+          - name: API_OCR
+            value: http://172.16.84.6
+          - name: API_SOCKET
+            value: http://172.16.84.7/socket-io/api
+          - name: SOCKET_KEEPALIVE
+            value: "10"
+          - name: SOCKET_TIMEOUT
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY
+            value: "10"
+          - name: SOCKET_RECONNECT_DELAY_MAX
+            value: "10"
+          - name: QC_NUMBER_TASK_CLAIM
+            value: "10"
+          - name: ELROND_ENV
+            value: SIT
+          - name: HOTLINES
+            value: '[]'
+          image: 172.16.84.2/training-ui:v0.0.44
+          imagePullPolicy: Always
+          name: training-ui
+          ports:
+          - containerPort: 80
+            name: training-ui
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: uac
+    name: uac
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: uac
+    template:
+      metadata:
+        labels:
+          app: uac
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_USER
+            value: saga
+          - name: APPLICATION_DB_PASSWORD
+            value: saga_123
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: USER_DB_HOST
+            value: 172.16.84.3
+          - name: USER_DB_PORT
+            value: "5432"
+          - name: USER_DB_USERNAME
+            value: reporter
+          - name: USER_DB_PASSWORD
+            value: thisisreporter
+          - name: USER_DB_NAME
+            value: database_backup_system
+          - name: USER_DB_MAX_CONN
+            value: "100"
+          - name: USER_IDLE_TIMEOUT
+            value: "30000"
+          - name: USER_SCHEMA_NAME
+            value: db_09_000_pms
+          - name: AUTH_URL
+            value: http://172.16.84.7/oauth/check_token
+          - name: IS_CLOUD
+            value: "true"
+          - name: DEBUG
+            value: "false"
+          image: 172.16.84.2/uac:v1.0.37
+          imagePullPolicy: Always
+          name: uac
+          ports:
+          - containerPort: 80
+            name: uac
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: wk-detail
+    name: wk-detail
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: wk-detail
+    template:
+      metadata:
+        labels:
+          app: wk-detail
+      spec:
+        containers:
+        - env:
+          - name: APPLICATION_DB_NAME
+            value: saga
+          - name: APPLICATION_DB_HOST
+            value: 172.16.84.2
+          - name: APPLICATION_DB_PORT
+            value: "27017"
+          - name: APPLICATION_DB_MAX_CONN
+            value: "10"
+          - name: APPLICATION_DB_MIN_CONN
+            value: "2"
+          - name: APPLICATION_IDLE_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "10"
+          - name: RECONNECT_INTERVAL
+            value: "500"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: APPLICATION_DB_USER
+            value: dgs3_apollo
+          - name: APPLICATION_DB_PASSWORD
+            value: L2unch2p0ll0
+          - name: CONNECT_OPTIONS
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: QUEUE_NAME
+            value: x.queue.working_detail
+          - name: DEBUG
+            value: "false"
+          image: 172.16.84.2/wk-detail:v0.0.8
+          imagePullPolicy: Always
+          name: wk-detail
+          ports:
+          - containerPort: 80
+            name: wk-detail
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: wk-final-doc
+    name: wk-final-doc
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: wk-final-doc
+    template:
+      metadata:
+        labels:
+          app: wk-final-doc
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            value: apollo_workflow
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_MAX_CONNECTIONS
+            value: "10"
+          - name: DB_MIN_CONNECTIONS
+            value: "2"
+          - name: DB_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "10"
+          - name: RECONNECT_INTERVAL
+            value: "500"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: DB_USER
+            value: dgs3_apollo
+          - name: DB_PASSWORD
+            value: L2unch2p0ll0
+          - name: QUEUE_URI
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: QUEUE_NAME
+            value: x.service.finalize_data_doc
+          - name: QUEUE_SELECTOR
+          image: 172.16.84.2/wk-final-doc:v0.0.3
+          imagePullPolicy: Always
+          name: wk-final-doc
+          ports:
+          - containerPort: 80
+            name: wk-final-doc
+            protocol: TCP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: wk-finalize-data
+    name: wk-finalize-data
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: finalize-data
+    template:
+      metadata:
+        labels:
+          app: finalize-data
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            value: saga
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_MAX_CONNECTIONS
+            value: "10"
+          - name: DB_MIN_CONNECTIONS
+            value: "2"
+          - name: DB_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "10"
+          - name: RECONNECT_INTERVAL
+            value: "500"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: DB_USER
+            value: saga
+          - name: DB_PASSWORD
+            value: saga_123
+          - name: QUEUE_NAME_PERSIST_DATA
+            value: x.service.persist_batch
+          - name: QUEUE_NAME_FINALIZE_DATA
+            value: x.service.finalize_data
+          - name: CONNECT_OPTIONS
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: QUEUE_SELECTOR
+            value: '""'
+          - name: SERVER_MOUNT_POINT
+            value: /mnt
+          - name: S2_HOST
+            value: http://172.16.84.8/view/
+          - name: S2_KEY_STRING
+            value: PLuiuEZfzcK8kpnMEOHd6Y3xv9IyoJJnoC
+          - name: SERVICE_NAME
+            value: finalize-data
+          image: 172.16.84.2/data-mng-api:t1.0.2
+          name: finalize-data
+          ports:
+          - containerPort: 80
+            name: finalize-data
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: wk-persist-data
+    name: wk-persist-data
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: persist-data
+    template:
+      metadata:
+        labels:
+          app: persist-data
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            value: saga
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_MAX_CONNECTIONS
+            value: "10"
+          - name: DB_MIN_CONNECTIONS
+            value: "2"
+          - name: DB_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "10"
+          - name: RECONNECT_INTERVAL
+            value: "500"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: DB_USER
+            value: saga
+          - name: DB_PASSWORD
+            value: saga_123
+          - name: QUEUE_NAME_PERSIST_DATA
+            value: x.service.persist_batch
+          - name: QUEUE_NAME_FINALIZE_DATA
+            value: x.service.finalize_data
+          - name: CONNECT_OPTIONS
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: QUEUE_SELECTOR
+            value: '""'
+          - name: SERVER_MOUNT_POINT
+            value: /mnt
+          - name: S2_HOST
+            value: http://172.16.84.8/view/
+          - name: S2_KEY_STRING
+            value: PLuiuEZfzcK8kpnMEOHd6Y3xv9IyoJJnoC
+          - name: SERVICE_NAME
+            value: persist-data
+          image: 172.16.84.2/data-mng-api:t1.0.2
+          name: persist-data
+          ports:
+          - containerPort: 80
+            name: persist-data
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: wk-tranform-api
+    name: wk-tranform-api
+    namespace: saga
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: wk-tranform-api
+    template:
+      metadata:
+        labels:
+          app: wk-tranform-api
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            value: saga
+          - name: DB_HOST
+            value: 172.16.84.2
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_MAX_CONNECTIONS
+            value: "10"
+          - name: DB_MIN_CONNECTIONS
+            value: "2"
+          - name: DB_TIMEOUT
+            value: "500"
+          - name: RECONNECT_TRIES
+            value: "10"
+          - name: RECONNECT_INTERVAL
+            value: "500"
+          - name: BUFFER_STORED_MAX
+            value: "1000"
+          - name: DB_USER
+            value: saga
+          - name: DB_PASSWORD
+            value: saga_123
+          - name: QUEUE_NAME_EXPORT
+            value: x.service.export
+          - name: CONNECT_OPTIONS
+            value: '{"amqp": "amqp://admin:admin@172.16.84.2:5672","stomp":{"host":
+              "172.16.84.2","port": 61613,"connectHeaders": {"host": "/","login": "admin","passcode":
+              "admin"}}}'
+          - name: MONITOR
+            value: '""'
+          image: 172.16.84.2/wk-tranform-api:t1.0.0
+          imagePullPolicy: Always
+          name: wk-tranform-api
+          ports:
+          - containerPort: 80
+            name: wk-tranform-api
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /mnt
+            name: images
+        volumes:
+        - name: images
+          hostPath:
+            path: /home/mnt
+            type: Directory
