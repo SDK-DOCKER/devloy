@@ -1,0 +1,65 @@
+ <!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+   
+    http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<!-- 
+
+    Lets deploy some Enterprise Integration Patterns inside the ActiveMQ Message Broker
+    For more information, see:
+    
+    http://camel.apache.org
+    
+    Include this file in your configuration to enable Camel
+    
+    e.g. <import resource="camel.xml"/>
+    
+-->
+<beans
+   xmlns="http://www.springframework.org/schema/beans"  
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="
+     http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!-- repository for the idempotent consumer -->
+<bean id="myRepo" class="org.apache.camel.processor.idempotent.MemoryIdempotentRepository"/>
+ 
+<camelContext xmlns="http://camel.apache.org/schema/spring">
+   <route>
+        <from uri="activemq:queue:da.acquisitor.job.reply"/>
+        <log message="Route message from in queue to out queue with data ${body}" />
+	    <inOnly uri="bean:myRepo?method=remove(${header.JMSCorrelationID})"/>        
+    </route>
+    <route>
+	    <from uri="activemq:queue:da.acquisitor.job.dedup"/>
+        <!-- we do not want to skip any duplicate messages -->
+        <idempotentConsumer messageIdRepositoryRef="myRepo" skipDuplicate="false">
+            <!-- use the messageId header as key for identifying duplicate messages -->
+            <header>JMSCorrelationID</header>
+            <!-- we will to handle duplicate messages using a filter -->
+            <filter>
+                <!-- the filter will only react on duplicate messages, if this property is set on the Exchange -->
+                <exchangeProperty>CamelDuplicateMessage</exchangeProperty>
+                <to uri="activemq:queue:da.acquisitor.job.duplicate?preserveMessageQos=true"/>
+                <!-- and then stop -->
+                <stop/>
+            </filter>
+            <!-- here we route only new messages -->            
+	        <to uri="activemq:queue:da.acquisitor.job?preserveMessageQos=true"/>
+	    </idempotentConsumer>
+    </route>    
+</camelContext>
+
+</beans>
