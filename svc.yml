@@ -171,6 +171,7 @@ items:
     type: ClusterIP
 - apiVersion: v1
   kind: Service
+  metadata:
     name: oauth2-server
     namespace: saga
   spec:
