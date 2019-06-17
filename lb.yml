@@ -9,17 +9,11 @@ items:
       nginx.ingress.kubernetes.io/session-cookie-name: hash
       nginx.org/client-max-body-size: 50m
       nginx.org/websocket-services: socket-server
-    creationTimestamp: "2019-05-23T02:01:23Z"
-    generation: 1
     name: lb
     namespace: saga
-    resourceVersion: "5183044"
-    selfLink: /apis/extensions/v1beta1/namespaces/cloud/ingresses/lb
-    uid: aa2deb3d-7cfe-11e9-8342-000c298fb8d6
   spec:
     rules:
-    - host: 172.16.84.7
-      http:
+    - http:
         paths:
         - backend:
             serviceName: root-ui
@@ -89,12 +83,6 @@ items:
             serviceName: bpmn-engine
             servicePort: 80
           path: /engine-rest
-    tls:
-    - hosts:
-      - cloud.digi-texx.vn
-      secretName: ssl
-  status:
-    loadBalancer: {}
 kind: List
 metadata:
   resourceVersion: ""
